@@ -54,7 +54,7 @@ class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)  # Keeping this required for clarity
 
     # Relationships
     order = db.relationship('Order', back_populates='order_items')
@@ -94,6 +94,7 @@ class ProductSchema(Schema):
 class OrderSchema(Schema):
     id = fields.Int()
     user_id = fields.Int()
+    order_items = fields.List(fields.Nested('OrderItemSchema'))  # Include order items
 
 class OrderItemSchema(Schema):
     id = fields.Int()
@@ -107,4 +108,3 @@ class ReviewSchema(Schema):
     product_id = fields.Int()
     rating = fields.Int()
     comment = fields.Str()
-

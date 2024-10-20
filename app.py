@@ -27,6 +27,21 @@ db.init_app(app)
 def home():
     return "Welcome To Safari Vendors API"
 
+# Login route
+@app.route('/login', methods=['POST'])
+def login():
+    """Log in a user and return a JWT."""
+    data = request.json
+    email = data.get('email')
+    password = data.get('password')
+
+    user = User.query.filter_by(email=email).first()
+    if user and bcrypt.check_password_hash(user.password, password):
+        access_token = create_access_token(identity=user.id)
+        return make_response(jsonify(access_token=access_token), 200)
+    else:
+        return make_response(jsonify({"msg": "Bad email or password"}), 401)
+
 # Create a new review
 @app.route('/products/<int:product_id>/reviews', methods=['POST'])
 @jwt_required()
