@@ -12,8 +12,8 @@ class User(db.Model):
     password = db.Column(db.String, nullable=False)
     
     # Relationships
-    reviews = db.relationship('Review', back_populates='user')
-    orders = db.relationship('Order', back_populates='user')
+    reviews = db.relationship('Review', back_populates='user', cascade='all, delete-orphan')
+    orders = db.relationship('Order', back_populates='user', cascade='all, delete-orphan')
 
 # Vendor Model
 class Vendor(db.Model):
@@ -34,7 +34,7 @@ class Product(db.Model):
     vendor_id = db.Column(db.Integer, db.ForeignKey('vendors.id'))
 
     # Relationships
-    reviews = db.relationship('Review', back_populates='product')
+    reviews = db.relationship('Review', back_populates='product', cascade='all, delete-orphan')
 
 # Order Model
 class Order(db.Model):
@@ -42,10 +42,11 @@ class Order(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    
+    total_amount = db.Column(db.Float, nullable=False)  # Total amount of the order
+
     # Relationships
     user = db.relationship('User', back_populates='orders')
-    order_items = db.relationship('OrderItem', back_populates='order')
+    order_items = db.relationship('OrderItem', back_populates='order', cascade='all, delete-orphan')
 
 # Order Item Model
 class OrderItem(db.Model):
@@ -67,7 +68,7 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-    rating = db.Column(db.Integer, nullable=False)
+    rating = db.Column(db.Integer, nullable=False)  # Consider validation for rating (1-5)
     comment = db.Column(db.String, nullable=False)
 
     # Relationships
@@ -94,6 +95,7 @@ class ProductSchema(Schema):
 class OrderSchema(Schema):
     id = fields.Int()
     user_id = fields.Int()
+    total_amount = fields.Float()  # Include total amount
     order_items = fields.List(fields.Nested('OrderItemSchema'))  # Include order items
 
 class OrderItemSchema(Schema):
@@ -106,5 +108,5 @@ class ReviewSchema(Schema):
     id = fields.Int()
     user_id = fields.Int()
     product_id = fields.Int()
-    rating = fields.Int()
+    rating = fields.Int()  # You might want to restrict values between 1-5
     comment = fields.Str()
